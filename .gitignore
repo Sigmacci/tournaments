@@ -53,6 +53,9 @@ server-api/.vs/
 server-api/*.user
 server-api/*.suo
 
+# Mailtrap credentials
+server-api/smtp-credentials.json
+
 # ============================
 # React (client-app)
 # ============================

@@ -73,6 +73,7 @@ client-app/build/
 
 # misc
 client-app/.DS_Store
+client-app/.env
 client-app/.env.local
 client-app/.env.development.local
 client-app/.env.test.local

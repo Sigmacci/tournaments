@@ -4,6 +4,7 @@ import Register from "../pages/Register";
 import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import CreateTournament from "../pages/CreateTournament";
 
 const Navigator = () => {
     return (
@@ -14,6 +15,7 @@ const Navigator = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/create" element={<CreateTournament />} />
             </Routes>
         </Router>
     );

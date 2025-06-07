@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using server_api.Models;
 
-public class UserDbContext : IdentityDbContext<User>
+public class AppDbContext : IdentityDbContext<User>
 {
-    public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
+
+    public DbSet<Tournament> Tournaments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

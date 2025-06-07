@@ -1,16 +1,16 @@
 import './App.css';
 import Navigator from './navigation/Navigator';
 
-export const setToken = (token) => {
-  localStorage.setItem('jwtToken', token);
-};
+export function getToken() {
+    return localStorage.getItem('token');
+}
 
-export const getToken = () => {
-  return localStorage.getItem('jwtToken');
-};
+export function setToken(token) {
+    localStorage.setItem('token', token);
+}
 
-export const removeToken = () => {
-  localStorage.removeItem('jwtToken');
+export function removeToken() {
+  localStorage.removeItem('token');
 };
 
 function App() {

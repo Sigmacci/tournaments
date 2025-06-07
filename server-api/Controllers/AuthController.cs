@@ -1,11 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using server_api.Dtos;
 using server_api.Models;
 using server_api.Services;
+
+namespace server_api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -172,5 +175,26 @@ public class AuthController : ControllerBase
             return BadRequest(result.Errors);
 
         return Ok("Password has been reset.");
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+            return Unauthorized();
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound("User not found.");
+
+        return Ok(new
+        {
+            user.Id,
+            user.FirstName,
+            user.LastName
+        });
     }
 }

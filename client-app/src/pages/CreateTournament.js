@@ -1,13 +1,10 @@
 import axios from 'axios';
-import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Form, Button, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { getToken, setToken } from "../App";
-import { Autocomplete } from '@react-google-maps/api';
-import { useRef } from 'react';
+import { GoogleMap, Marker, Autocomplete, LoadScript } from '@react-google-maps/api';
 
 
 const CreateTournament = () => {
@@ -21,8 +18,8 @@ const CreateTournament = () => {
         eventTime: '',
         participationDeadline: '',
         locationName: '',
-        latitude: 22.54992,
-        longitude: 0,
+        latitude: 52.40260118220251,
+        longitude: 16.948277760634944,
         maxParticipants: '',
         sponsorLogos: ['']
     });
@@ -70,46 +67,39 @@ const CreateTournament = () => {
     };
 
     const handleMapClick = (e) => {
-        // Ensure google maps API is loaded from the global window object
-        if (window.google && window.google.maps && window.google.maps.Geocoder) {
-            const geocoder = new window.google.maps.Geocoder();
-            geocoder.geocode({ location: { lat: e.detail.latLng.lat, lng: e.detail.latLng.lng } }, (results, status) => {
-                if (status === 'OK' && results && results[0]) {
-                    setForm(f => ({
-                        ...f,
-                        locationName: results[0].formatted_address,
-                        latitude: e.detail.latLng.lat,
-                        longitude: e.detail.latLng.lng
-                    }));
-                } else {
-                    setForm(f => ({//
-                        ...f,
-                        latitude: e.detail.latLng.lat,
-                        longitude: e.detail.latLng.lng
-                    }));
-                }
-            });
-        } else {
-            // Fallback if google is not loaded yet
-            setForm(f => ({
-                ...f,
-                latitude: e.detail.latLng.lat,
-                longitude: e.detail.latLng.lng
-            }));
-        }
+        const lat = e.detail.latLng.lat;
+        const lng = e.detail.latLng.lng;
+
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+                setForm(f => ({
+                    ...f,
+                    locationName: results[0].formatted_address,
+                    latitude: lat,
+                    longitude: lng
+                }));
+            } else {
+                setForm(f => ({
+                    ...f,
+                    latitude: lat,
+                    longitude: lng
+                }));
+            }
+        });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        try{
+
+        try {
             axios.post('https://localhost:7097/api/tournament/create', form, {
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
                 }
             })
                 .then(res => {
-                    if (res.status === 200) {
+                    if (res.status >= 200 && res.status < 300) {
                         navigate('/');
                     } else {
                         console.error('Error creating tournament:', res.data);
@@ -124,137 +114,178 @@ const CreateTournament = () => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', height: '100vh' }}>
-            <Card style={{ width: '400px', padding: '2rem', margin: '2rem' }}>
-                <Card.Body>
-                    <Card.Title>Create Tournament</Card.Title>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="name"
-                                value={form.name}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Discipline</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="discipline"
-                                value={form.discipline}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Event Time</Form.Label>
-                            <Form.Control
-                                type="datetime-local"
-                                name="eventTime"
-                                value={form.eventTime}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Participation Deadline</Form.Label>
-                            <Form.Control
-                                type="datetime-local"
-                                name="participationDeadline"
-                                value={form.participationDeadline}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Location</Form.Label>
-                            <Autocomplete
-                                onLoad={autocomplete => (autocompleteRef.current = autocomplete)}
-                                onPlaceChanged={() => {
-                                    if (!autocompleteRef.current) return;
+        <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY} libraries={['places']}>
 
-                                    const place = autocompleteRef.current.getPlace();
-                                    if (place && place.geometry) {
-                                        const lat = place.geometry.location.lat();
-                                        const lng = place.geometry.location.lng();
-                                        console.log(lat, lng);
-                                        setForm(f => ({
-                                            ...f,
-                                            locationName: place.formatted_address || place.name,
-                                            latitude: lat,
-                                            longitude: lng
-                                        }));
-                                    }
-                                }}
-                            >
+            <div style={{ display: 'flex', flexDirection: 'row', height: '100vh' }}>
+                <Card style={{ width: '400px', padding: '2rem', margin: '2rem' }}>
+                    <Card.Body>
+                        <Card.Title>Create Tournament</Card.Title>
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Name</Form.Label>
                                 <Form.Control
                                     type="text"
-                                    name="locationName"
-                                    value={form.locationName}
+                                    name="name"
+                                    value={form.name}
                                     onChange={handleChange}
                                     required
-                                    placeholder="Search for a location"
                                 />
-                            </Autocomplete>
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Max Participants</Form.Label>
-                            <Form.Control
-                                type="number"
-                                name="maxParticipants"
-                                value={form.maxParticipants}
-                                onChange={handleChange}
-                                required
-                                min={1}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Sponsor Logos</Form.Label>
-                            {form.sponsorLogos.map((logo, idx) => (
-                                <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Discipline</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="discipline"
+                                    value={form.discipline}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Event Time</Form.Label>
+                                <Form.Control
+                                    type="datetime-local"
+                                    name="eventTime"
+                                    value={form.eventTime}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Participation Deadline</Form.Label>
+                                <Form.Control
+                                    type="datetime-local"
+                                    name="participationDeadline"
+                                    value={form.participationDeadline}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Location</Form.Label>
+                                <Autocomplete
+                                    onLoad={autocomplete => (autocompleteRef.current = autocomplete)}
+                                    onPlaceChanged={() => {
+                                        if (!autocompleteRef.current || typeof autocompleteRef.current.getPlace !== 'function') return;
+
+                                        const place = autocompleteRef.current.getPlace();
+                                        if (!place) return;
+
+                                        if (!form.locationName) {
+                                            form.locationName = "plac Marii Skłodowskiej-Curie 5, 60-965 Poznań, Польша";
+                                            const geocoder = new window.google.maps.Geocoder();
+                                            geocoder.geocode({ address: form.locationName }, (results, status) => {
+                                                if (status === 'OK' && results[0]) {
+                                                    const location = results[0].geometry.location;
+                                                    setForm(f => ({
+                                                        ...f,
+                                                        locationName: results[0].formatted_address,
+                                                        latitude: location.lat(),
+                                                        longitude: location.lng()
+                                                    }));
+                                                } else {
+                                                    console.error("Geocoding failed: ", status);
+                                                }
+                                            });
+                                        }
+                                        if (place && place.geometry) {
+                                            const lat = place.geometry.location.lat();
+                                            const lng = place.geometry.location.lng();
+                                            setForm(f => ({
+                                                ...f,
+                                                locationName: place.formatted_address || place.name,
+                                                latitude: lat,
+                                                longitude: lng
+                                            }));
+                                        }
+                                    }}
+                                >
                                     <Form.Control
                                         type="text"
-                                        name={`sponsorLogos-${idx}`}
-                                        value={logo}
+                                        name="locationName"
+                                        value={form.locationName}
                                         onChange={handleChange}
-                                        placeholder="Sponsor Logo URL"
+                                        required
+                                        placeholder="Search for a location"
                                     />
-                                    <Button
-                                        variant="danger"
-                                        type="button"
-                                        onClick={() => handleRemoveSponsorLogo(idx)}
-                                        disabled={form.sponsorLogos.length === 1}
-                                        style={{ marginLeft: 4 }}
-                                    >-</Button>
-                                </div>
-                            ))}
-                            <Button variant="secondary" type="button" onClick={handleAddSponsorLogo} className="mt-2">
-                                Add Sponsor Logo
-                            </Button>
-                        </Form.Group>
-                        <Button variant="primary" type="submit">Create</Button>
-                    </Form>
-                </Card.Body>
-            </Card>
-            <div style={{ flex: 1 }}>
-                <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY} libraries={['places']}>
-                    <Map
-                        style={{ width: '100%', height: '100%' }}
+                                </Autocomplete>
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Max Participants</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="maxParticipants"
+                                    value={form.maxParticipants}
+                                    onChange={handleChange}
+                                    required
+                                    min={1}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Sponsor Logos</Form.Label>
+                                {form.sponsorLogos.map((logo, idx) => (
+                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+                                        <Form.Control
+                                            type="text"
+                                            name={`sponsorLogos-${idx}`}
+                                            value={logo}
+                                            onChange={handleChange}
+                                            placeholder="Sponsor Logo URL"
+                                        />
+                                        <Button
+                                            variant="danger"
+                                            type="button"
+                                            onClick={() => handleRemoveSponsorLogo(idx)}
+                                            disabled={form.sponsorLogos.length === 1}
+                                            style={{ marginLeft: 4 }}
+                                        >-</Button>
+                                    </div>
+                                ))}
+                                <Button variant="secondary" type="button" onClick={handleAddSponsorLogo} className="mt-2">
+                                    Add Sponsor Logo
+                                </Button>
+                            </Form.Group>
+                            <Button variant="primary" type="submit" className='col-md-12'>Create</Button>
+                        </Form>
+                    </Card.Body>
+                </Card>
+                <div style={{ flex: 1 }}>
+                    <GoogleMap
+                        mapContainerStyle={{ width: '100%', height: '100%' }}
                         center={{ lat: form.latitude, lng: form.longitude }}
-                        zoom={15}
-                        gestureHandling={'greedy'}
-                        disableDefaultUI={true}
-                        onClick={handleMapClick}
+                        zoom={18}
+                        onClick={e => {
+                            const lat = e.latLng.lat();
+                            const lng = e.latLng.lng();
+                            const geocoder = new window.google.maps.Geocoder();
+                            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                                if (status === 'OK' && results[0]) {
+                                    setForm(f => ({
+                                        ...f,
+                                        locationName: results[0].formatted_address,
+                                        latitude: lat,
+                                        longitude: lng
+                                    }));
+                                } else {
+                                    setForm(f => ({
+                                        ...f,
+                                        latitude: lat,
+                                        longitude: lng
+                                    }));
+                                }
+                            });
+                        }}
+                        options={{
+                            gestureHandling: 'greedy',
+                            disableDefaultUI: true
+                        }}
                     >
                         <Marker position={{ lat: form.latitude, lng: form.longitude }} />
-                    </Map>
-                </APIProvider>
+                    </GoogleMap>
+                </div>
             </div>
-        </div>
+        </LoadScript>
     );
-};
+}
 
 export default CreateTournament;

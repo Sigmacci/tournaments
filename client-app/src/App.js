@@ -14,9 +14,6 @@ export function removeToken() {
 };
 
 function App() {
-  if (getToken()) {
-    removeToken();
-  }
   return (
     <Navigator />
   );

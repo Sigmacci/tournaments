@@ -67,6 +67,8 @@ public class TournamentController : ControllerBase
         _context.Tournaments.Add(tournament);
         await _context.SaveChangesAsync();
 
+        await _context.Entry(tournament).Reference(t => t.Organizer).LoadAsync();
+
         return CreatedAtAction(nameof(GetTournamentById), new { id = tournament.Id }, tournament);
     }
 

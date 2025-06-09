@@ -9,6 +9,8 @@ public class AppDbContext : IdentityDbContext<User>
     }
 
     public DbSet<Tournament> Tournaments { get; set; }
+    public DbSet<SponsorLogo> SponsorLogos { get; set; }
+    public DbSet<TournamentParticipant> TournamentParticipants { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

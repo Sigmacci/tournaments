@@ -197,4 +197,12 @@ public class AuthController : ControllerBase
             user.LastName
         });
     }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await _signInManager.SignOutAsync();
+        return Ok("Logged out successfully.");
+    }
 }

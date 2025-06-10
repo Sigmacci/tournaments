@@ -6,6 +6,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import CreateTournament from "../pages/CreateTournament";
 import TournamentDetails from "../pages/TournamentDetails";
+import EditTournament from "../pages/EditTournament";
 
 const Navigator = () => {
     return (
@@ -18,6 +19,7 @@ const Navigator = () => {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/create" element={<CreateTournament />} />
                 <Route path="/tournament/:id" element={<TournamentDetails />} />
+                <Route path="/edit/:id" element={<EditTournament />} />
             </Routes>
         </Router>
     );

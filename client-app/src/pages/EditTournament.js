@@ -2,12 +2,13 @@ import axios from 'axios';
 import { useState, useEffect, useRef } from 'react';
 import { Form, Button, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getToken, setToken } from "../App";
 import { GoogleMap, Marker, Autocomplete, LoadScript } from '@react-google-maps/api';
 
 
-const CreateTournament = () => {
+const EditTournament = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
     const autocompleteRef = useRef(null);
 
@@ -29,6 +30,32 @@ const CreateTournament = () => {
             console.error('No token found, redirecting to login');
             return navigate('/login', { replace: true });
         }
+        axios.get(`https://localhost:7097/api/tournament/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        })
+            .then(res => {
+                if (res.data) {
+                    setForm({
+                        ...form,
+                        name: res.data.name,
+                        discipline: res.data.discipline,
+                        organizerId: res.data.organizerId,
+                        eventTime: res.data.eventTime,
+                        participationDeadline: res.data.participationDeadline,
+                        locationName: res.data.locationName,
+                        latitude: res.data.latitude,
+                        longitude: res.data.longitude,
+                        maxParticipants: res.data.maxParticipants,
+                        sponsorLogos: res.data.sponsorLogos || ['']
+                    });
+                }
+            })
+            .catch((e) => {
+                console.error('Error fetching tournament data:', e);
+                return navigate('/login', { replace: true });
+            });
         axios.get('https://localhost:7097/api/auth/me', {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -93,7 +120,7 @@ const CreateTournament = () => {
         e.preventDefault();
 
         try {
-            axios.post('https://localhost:7097/api/tournament/create', form, {
+            axios.put(`https://localhost:7097/api/tournament/edit/${id}`, form, {
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
                 }
@@ -102,7 +129,7 @@ const CreateTournament = () => {
                     if (res.status >= 200 && res.status < 300) {
                         navigate('/');
                     } else {
-                        console.error('Error creating tournament:', res.data);
+                        console.error('Error updating tournament:', res.data);
                         alert('Failed to create tournament: ' + res.data.message);
                     }
                 })
@@ -294,4 +321,4 @@ const CreateTournament = () => {
     );
 }
 
-export default CreateTournament;
+export default EditTournament;

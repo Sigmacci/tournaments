@@ -199,6 +199,23 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("user/{id}")]
+    public async Task<IActionResult> GetUserById(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound("User not found.");
+
+        return Ok(new
+        {
+            user.Id,
+            user.FirstName,
+            user.LastName,
+            user.Email
+        });
+    }
+
+    [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {

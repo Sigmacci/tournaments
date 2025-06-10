@@ -2,6 +2,7 @@ namespace server_api.Dtos;
 
 public class ParticipantDto
 {
-    public string LicenseNumber { get; set; } = null!;
-    public int Rank { get; set; } = 0;
+    public string Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
 }

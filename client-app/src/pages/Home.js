@@ -155,7 +155,7 @@ const Home = () => {
                             <input type="radio" className="btn-check" name="btnradio" id="btnradio1" autoComplete="off" checked={filterType === "all"} onClick={() => setFilterType("all")} />
                             <label className="btn btn-outline-primary" htmlFor="btnradio1">All tournaments</label>
 
-                            <input type="radio" className="btn-check" name="btnradio" id="btnradio2" autoComplete="off" disabled={!getToken()} checked={filterType == "my"} onClick={() => setFilterType("my")} />
+                            <input type="radio" className="btn-check" name="btnradio" id="btnradio2" autoComplete="off" disabled={!getToken()} checked={filterType === "my"} onClick={() => setFilterType("my")} />
                             <label className="btn btn-outline-primary" htmlFor="btnradio2">My tournaments</label>
                         </div>
                     </div>

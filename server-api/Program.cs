@@ -27,6 +27,8 @@ builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.Requi
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ILadderService, LadderService>();
+builder.Services.AddHostedService<TournamentScheduler>();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromHours(24);

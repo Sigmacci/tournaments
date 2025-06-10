@@ -12,14 +12,18 @@ using Microsoft.EntityFrameworkCore;
 public class TournamentParticipant
 {
     public int Id { get; set; }
+    public string UserId { get; set; } = null!;
     public int TournamentId { get; set; }
+
     [ForeignKey(nameof(TournamentId))]
     [JsonIgnore]
     public Tournament Tournament { get; set; }
-    public string ParticipantId { get; set; } = null!;
+
     public string LicenseNumber { get; set; } = null!;
     public int Rank { get; set; } = 0;
+    public bool IsSeeded { get; set; }
 
-    [ForeignKey(nameof(ParticipantId))]
+    [ForeignKey(nameof(UserId))]
+    [JsonIgnore]
     public User Participant { get; set; } = null!;
 }

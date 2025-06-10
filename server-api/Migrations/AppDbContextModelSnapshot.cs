@@ -204,11 +204,58 @@ namespace server_api.Migrations
                     b.Property<int>("RankedPlayersCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizerId");
 
                     b.ToTable("Tournaments");
+                });
+
+            modelBuilder.Entity("server_api.Models.TournamentMatch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsParticipant1InNextMatch")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("NextMatchId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Participant1Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Participant2Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Result")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SubmittedByParticipant1")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SubmittedByParticipant2")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TournamentId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NextMatchId");
+
+                    b.HasIndex("Participant1Id");
+
+                    b.HasIndex("Participant2Id");
+
+                    b.HasIndex("TournamentId");
+
+                    b.ToTable("Matches");
                 });
 
             modelBuilder.Entity("server_api.Models.TournamentParticipant", b =>
@@ -217,11 +264,10 @@ namespace server_api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("LicenseNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("IsSeeded")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("ParticipantId")
+                    b.Property<string>("LicenseNumber")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -231,9 +277,13 @@ namespace server_api.Migrations
                     b.Property<int>("TournamentId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ParticipantId");
+                    b.HasIndex("UserId");
 
                     b.HasIndex("TournamentId", "LicenseNumber")
                         .IsUnique();
@@ -389,17 +439,46 @@ namespace server_api.Migrations
                     b.Navigation("Organizer");
                 });
 
-            modelBuilder.Entity("server_api.Models.TournamentParticipant", b =>
+            modelBuilder.Entity("server_api.Models.TournamentMatch", b =>
                 {
-                    b.HasOne("server_api.Models.User", "Participant")
+                    b.HasOne("server_api.Models.TournamentMatch", "NextMatch")
                         .WithMany()
-                        .HasForeignKey("ParticipantId")
+                        .HasForeignKey("NextMatchId");
+
+                    b.HasOne("server_api.Models.TournamentParticipant", "Participant1")
+                        .WithMany()
+                        .HasForeignKey("Participant1Id");
+
+                    b.HasOne("server_api.Models.TournamentParticipant", "Participant2")
+                        .WithMany()
+                        .HasForeignKey("Participant2Id");
+
+                    b.HasOne("server_api.Models.Tournament", "Tournament")
+                        .WithMany("Matches")
+                        .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("NextMatch");
+
+                    b.Navigation("Participant1");
+
+                    b.Navigation("Participant2");
+
+                    b.Navigation("Tournament");
+                });
+
+            modelBuilder.Entity("server_api.Models.TournamentParticipant", b =>
+                {
                     b.HasOne("server_api.Models.Tournament", "Tournament")
                         .WithMany("Participants")
                         .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("server_api.Models.User", "Participant")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -410,6 +489,8 @@ namespace server_api.Migrations
 
             modelBuilder.Entity("server_api.Models.Tournament", b =>
                 {
+                    b.Navigation("Matches");
+
                     b.Navigation("Participants");
 
                     b.Navigation("SponsorLogos");
